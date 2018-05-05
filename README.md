@@ -138,6 +138,7 @@ Note : 这个方法在实现你想要的速度时，会采取丢帧策略。
 ```markdown
 #ffmpeg -i test.mp4 -filter:v "setpts=2.0*PTS" output.mp4
 ```
+
 5. 加速/减慢音频
 可以使用" atempo" 音频滤镜来加速或减慢音频。如双倍速音频命令: 
 ```markdown
@@ -148,6 +149,52 @@ Note : 这个方法在实现你想要的速度时，会采取丢帧策略。
 ```markdown
 #ffmpeg -i test.mp4 -filter:a "atempo=2.0,atempo=2.0" -vn output.mp4
 ```
+
+6.静态图水印
+下例添加 png 或其他静态格式的水印，放置在距左侧 20 像素,距顶端 40 像素的地方。水印与视频的基准点都是左上角点。
+```markdown
+#ffmpeg -i test.mp4 -i wm.png -filter_complex "overlay=20:40" output.mp4
+```
+会出现问题：Decoder (codec png) not found for input stream #1:0
+
+原因：
+It appears your compiled without zlib support which is a requirement for PNG decoding and encoding (refer to the code of the FFmpeg configure file to see what else requires it).
+
+For Debian/Ubuntu this means you need zlib1g-dev, or for CentOS zlib-devel, as a build dependency and re-compile FFmpeg. It is automatically detected by FFmpeg, so you won't need to add additional ./configure parameters meaning you can also omit --enable-decoder=png --enable-encoder=png.
+
+需要安装zlib-devel图片解码器，并且重新编译ffmpeg，由于ffmpeg自动识别，无需添加编译参数
+
+安装依赖包
+```markdown
+#yum install -y autoconf automake cmake freetype-devel gcc gcc-c++ git libtool make mercurial nasm pkgconfig zlib-devel
+```
+直接删除/usr/local/bin/ffmpeg 和/usr/local/include文件，
+然后重新编译ffmpeg，然后再次添加水印即可
+
+7. 使用ffempg中的filter添加特效
+ffmpeg命令行中，跟在 "-vf"之后的就是一个滤镜图。
+使用boxblur滤镜添加
+```markdown
+#ffmpeg -i test.mp4 -vf boxblur=1.5:1 output.mp4
+```
+出现问题：No such filter: 'boxblur'
+提示说：ffmpeg -filters will list all filters for this build. If missing, you'll have to build ffmpeg yourself or install from a newer package.
+使用
+```markdown
+#ffmpeg -filters 
+```
+查找以及安装的滤镜后发现没有boxblur这个滤镜
+没有找到滤镜的原因：一般是因为使用默认编译选项是该filter并未被编译进库里面，./configure 时候添加参数，重新再编译ffmpeg
+
+```markdown
+./configure --prefix=/usr/local/ffmpeg --disable-static --enable-shared --enable-libmp3lame --enable-libvorbis --enable-gpl --enable-version3 --enable-nonfree --enable-pthreads --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libx264 --enable-libxvid --enable-postproc --enable-ffplay --enable-libfreetype
+```
+
+出现依赖包不存在问题，需要安装新的依赖包。
+由于无法确定滤镜依赖哪一个包，一次性导入所有滤镜需要的全部包，出现其他依赖包安装问题，待解决。。。
+
+
+
 
 
 

@@ -187,7 +187,7 @@ ffmpeg命令行中，跟在 "-vf"之后的就是一个滤镜图。
 没有找到滤镜的原因：一般是因为使用默认编译选项是该filter并未被编译进库里面，./configure 时候添加参数，重新再编译ffmpeg
 
 ```markdown
-./configure --prefix=/usr/local/ffmpeg --disable-static --enable-shared --enable-libmp3lame --enable-libvorbis --enable-gpl --enable-version3 --enable-nonfree --enable-pthreads --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libx264 --enable-libxvid --enable-postproc --enable-ffplay --enable-libfreetype
+#./configure --prefix=/usr/local/ffmpeg --disable-static --enable-shared --enable-libmp3lame --enable-libvorbis --enable-gpl --enable-version3 --enable-nonfree --enable-pthreads --enable-libopencore-amrnb --enable-libopencore-amrwb --enable-libx264 --enable-libxvid --enable-postproc --enable-ffplay --enable-libfreetype
 ```
 
 出现依赖包不存在问题，需要安装新的依赖包。

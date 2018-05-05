@@ -74,23 +74,81 @@ wq保存退出
 # source /ect/profile   设置生效
 # ffmpeg -version       查看版本
 ```
-6. 测试视频转换，把mp4格式的视频转换成avi
+
+### ffmpeg命令行的使用
+
+ffmpeg 的一般工作流，是从源文件开始，依次经过分流器、解码器、编码器、混流器，最后完成输出文件。下图是官网给出的示意：
+
 ```markdown
-ffmpeg -i test.mp4 out.avi
+ _______              ______________
+|       |            |              |
+| input |  demuxer   | encoded data |   decoder
+| file  | ---------> | packets      | -----+
+|_______|            |______________|      |
+                                           v
+                                       _________
+                                      |         |
+                                      | decoded |
+                                      | frames  |
+                                      |_________|
+ ________             ______________       |
+|        |           |              |      |
+| output | <-------- | encoded data | <----+
+| file   |   muxer   | packets      |   encoder
+|________|           |______________|
 ```
-转换成功后：video:2462kB audio:1490kB subtitle:0kB other streams:0kB global headers:0kB muxing overhead: 2.582623%
+1. 测试视频转换，把mp4格式的视频转换成avi
+```markdown
+#ffmpeg -i test.mp4 out.avi
+```
+-i 输入文件
 
-**Bold** and _Italic_ and `Code` text
+2. 测试视频视频剪切，
+裁剪前 10 秒
+```markdown
+#ffmpeg -ss 0:0 -t 0:10 -i test.mp4 output.mp4
+```
+裁剪最后 10 秒：
+```markdown
+#ffmpeg -sseof -0:10 -i test.mp4 output.mp4
+```
+-ss 开始时间
+-t 持续时间
+-sseof 相对于文件末尾的开始时间
 
-[Link](url) and ![Image](src)
+3. 裁剪尺寸
+```markdown
+#ffmpeg -i  test.mp4 -vf scale=iw/2:-1 output.mp4
+```
+iw  : 是输入的宽度；比如，输入宽度为640. 640/2 = 320. 
+-1  : 通知缩放滤镜在输出时保持原始的宽高比，比如上述宽度对应的高度为240.
+
+4. 加速/减慢视频
+视频加速命令：
+```markdown
+#ffmpeg -i test.mp4 -filter:v "setpts=0.5*PTS" output.mp4
+```
+Note : 这个方法在实现你想要的速度时，会采取丢帧策略。
+如果想避免丢帧，可以指定输出的帧率比输入的帧率高的办法。
+例如，输入的帧率为4， 指定输出的帧率为4x, 即16fps :
+```markdown
+#ffmpeg -i test.mp4 -r 16 -filter:v "setpts=0.125*PTS" -an output.mkv
+```
+减慢视频命令: 
+```markdown
+#ffmpeg -i test.mp4 -filter:v "setpts=2.0*PTS" output.mp4
+```
+5. 加速/减慢音频
+可以使用" atempo" 音频滤镜来加速或减慢音频。如双倍速音频命令: 
+```markdown
+#ffmpeg -i test.mp4 -filter:a "atempo=2.0" -vn output.mp4
+```
+"atempo"滤镜对音频速度调整限制在0.5 到 2.0 之间，（即半速或倍速）。
+如果有必要，可以使用多个atempo滤镜来实现,如下面的命令实现四倍速音频:
+```markdown
+#ffmpeg -i test.mp4 -filter:a "atempo=2.0,atempo=2.0" -vn output.mp4
+```
 
 
-For more details see [GitHub Flavored Markdown](https://guides.github.com/features/mastering-markdown/).
 
-### Jekyll Themes
 
-Your Pages site will use the layout and styles from the Jekyll theme you have selected in your [repository settings](https://github.com/1369048759/FFmpeg-.github.io/settings). The name of this theme is saved in the Jekyll `_config.yml` configuration file.
-
-### Support or Contact
-
-Having trouble with Pages? Check out our [documentation](https://help.github.com/categories/github-pages-basics/) or [contact support](https://github.com/contact) and we’ll help you sort it out.
